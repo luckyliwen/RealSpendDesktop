@@ -1,0 +1,168 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="pragma" content="no-cache"> 
+	<meta http-equiv="Cache-Control" content="no-cache, must-revalidate"> 
+	<title>Demo of DetailPie and OverviewPies</title>
+
+	<script src="http://d3js.org/d3.v2.js"></script>
+ 	
+	</script>  
+	
+	<!-- Or use the sapui5 from server-->
+	<script id="sap-ui-bootstrap"
+        type="text/javascript"
+        src="http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5/resources/sap-ui-core.js"
+        data-sap-ui-theme="sap_goldreflection"
+        data-sap-ui-libs="sap.ui.commons, sap.ui.table,sap.ui.ux3"></script>
+	
+	<style>
+.areacommit {
+/*fill: url(#blue_white);*/
+fill:blue;
+}
+.barcommitfirst{
+fill:blue;
+}
+.barcommitlast{
+fill:blue;
+}
+.previous {
+  fill: grey;
+  fill-opacity:0.3;
+}
+#body {
+  font: 10px sans-serif;
+}
+
+
+.axis line {
+  fill: none;
+  stroke: black;
+  stroke-linejoin:round;
+}
+.axis path
+{
+  fill:none;
+  stroke: black;
+}
+
+.line {
+  fill: none;
+  stroke: black;
+  stroke-width: 1.5px;
+}
+.dashline {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1.5px;
+  stroke-dasharray: 4px;
+}
+.project{
+fill:#B0E0E6 ;
+  border:10px;
+}
+.previous{
+fill:gray;
+}
+	</style>
+	<!--Here is you js file-->
+			  <script src="../lib/datajs-1.0.3.js"></script>  <!-- teh sapui5 should load this -->
+   			  <!-- <script src="../lib/jquery.plugin.min.js"></script> -->
+   			  
+   			  <script src="../rs/Global.js"></script>
+   			  <script src="../rs/util/Util.js"></script>
+   			  <script src="../rs/cfg/Global.js"></script>
+   			  <script src="../rs/cfg/Cfg.js"></script>
+   			  
+   			  <script src="../rs/model/Model.js"></script>
+   			  <script src="../rs/model/ODataHelper.js"></script>
+   			  <script src="../rs/model/GeneralParam.js"></script>
+   			  <script src="../rs/model/HierMng.js"></script>
+   			  <script src="../rs/model/FuncParam.js"></script>
+   			  <script src="../rs/model/ModelMng.js"></script>
+   			  <script src="../rs/model/TextMng.js"></script>
+   			  <script src="../rs/model/Alert.js"></script>
+   			  <script src="../rs/model/Note.js"></script>
+   	
+   			  <script src="../rs/uilib/BarChart.js"></script>
+   			  <script src="../rs/uilib/AreaChart.js"></script>
+   			  
+   			  <script src="../rsui/Pie.js"></script>
+   			  <script src="../rsui/Bar.js"></script>
+	
+	<script>
+		//sap.ui.localResources("../rsui");
+		rs.ModuleMng.initWithoutView();
+		
+		//here can't directly create the bar as now the model part still not finish the init work, so user trigger it by button
+		var barChart = null; //put it as global so easy for debug
+		var trendDataMonth = null;
+		var trendDataQuarter = null;
+		var trendDataAnnual = null;
+		
+		var trendModelInfo = null;
+		
+		//Change following 
+		var hierId = 'CCGH5020';
+		var byHierId = 'CEGSPEND';
+		var periodType = rs.PeriodType.Monthly;   //Quarterly  Annual
+		 
+		function onDataLoadSucc() {
+			trendDataMonth = trendModelInfo.getDataByPeriodType( rs.PeriodType.Monthly );
+			trendDataQuarter = trendModelInfo.getDataByPeriodType( rs.PeriodType.Quarterly );
+			trendDataAnnual = trendModelInfo.getDataByPeriodType( rs.PeriodType.Annual );
+			
+			console.log("===trendData month, quarter, annual", trendDataMonth,trendDataQuarter, trendDataAnnual);
+			var barMonth = new rs.uilib.BarChart({
+				width: 1024,
+				height: 600,
+				data: trendDataMonth
+			});
+			var barQuarter = new rs.uilib.BarChart( {
+				width: 1024,
+				height: 600,
+				data: trendDataQuarter
+			});
+			var barAnnual = new rs.uilib.BarChart( {
+				width: 1024,
+				height: 600,
+				data: trendDataAnnual
+			});			
+			
+			barMonth.placeAt('monthly');
+			barQuarter.placeAt("quarterly");
+			barAnnual.placeAt("annual");
+		}
+		
+		
+		function testBarChart() {
+			trendModelInfo = rs.model.ModelMng.getTrendDataModelInfo(hierId, byHierId);
+			if (trendModelInfo.getLoadStatus() == rs.LoadStatus.NotStart) 
+			{
+				rs.model.ModelMng.loadTrendDataByTwoHierId(hierId, byHierId, onDataLoadSucc);
+			}
+		}
+		
+	</script>
+	
+	<style type="text/css">
+	
+	</style>
+</head>
+
+<body>
+	<input type='button' value='Test BarChart' onclick='testBarChart()' />
+	
+	<h1>The monthly chart</h1>
+	<div id="monthly"> </div>
+	
+	<h1>The Quarterly chart</h1>
+	<div id="quarterly"> </div>
+
+	<h1>The Annual chart</h1>
+	<div id="annual"> </div>
+	
+</body>
+</html>

@@ -1,0 +1,78 @@
+.cell {
+	position: absolute;
+	/*     border: 1px solid rgba(255, 255, 255, 0.2); */
+	color: white;
+	z-index: 1;
+}
+
+.cell .text {
+	position: absolute;
+	font: 15px/100% Calibri, Helvetica, sans-serif;
+	font-family: Calibri;
+	text-align: left;
+	bottom: 0;
+	padding: 0px 0px 5px 5px;
+	width: 100%;
+	font-weight: bold;
+	color: rgb(54, 54, 54);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.head {
+	width: 100%;
+	color: white;
+	height: 50px;
+	position: relative;
+	z-index: 5;
+	background-color: rgba(0, 0, 0, 0.4);
+	margin: 0;
+	text-align: left;
+	border-width: 0px;
+}
+
+.head .header_text {
+	font: 15px/100% Calibri, Helvetica, sans-serif;
+	font-weight: bold;
+	display: block;
+	overflow: hidden;
+	white-space: nowrap;
+	padding: 5px 0px 0px 5px;
+	text-overflow: ellipsis;
+	width: 100%;
+	position: absolute;
+	z-index: 5;
+}
+
+.head .header_image {
+	position: absolute;
+	right: -10px;
+	top: -5px;
+	z-index: 10;
+}
+
+.level-zero {
+	margin: 0;
+	border-width: 0;
+	z-index: 1;
+}
+
+.level-one {
+	border-width: 0;
+	box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.3);
+	z-index: 2;
+}
+
+.level-two {
+	margin: 0;
+	z-index: 3;
+}
+
+.level-one:hover {
+	cursor: pointer;
+}
+
+.hideCell {
+	display: none;
+}

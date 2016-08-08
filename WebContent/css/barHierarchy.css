@@ -1,0 +1,66 @@
+.barHierarchyTrapezoid:before{
+content: "";
+display: block;
+height: 0;
+border-width: 80px 25px 0px 25px;
+border-style: solid solid solid solid;
+border-color: #CBD8DC transparent transparent transparent
+}
+
+
+
+/*BEGIN arrow css for  bar hierarchy */ 
+.arrow_box_left1 {
+	position: relative;
+	background: white;
+	border: 1px solid transparent;
+	box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.3);
+}
+.arrow_box_left1:after, .arrow_box_left1:before {
+	right: 100%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.arrow_box_left1:after {
+	border-color: rgba(0, 0, 0, 0);
+	border-right-color: #cecece;
+	border-width: 15px;
+	top: 50%;
+	margin-top: -15px;
+}
+.arrow_box_left1:before {
+	border-color: rgba(0, 0, 0, 0);
+	border-right-color:  #cecece;
+	border-width: 16px;
+	top: 50%;
+	margin-top: -16px;
+}
+
+
+.noEnter, .needEnter{
+  font-size: 14px;
+}
+
+.barHierRectBackground {
+  fill: #EFEFEF;
+  pointer-events: all;
+}
+
+.barHierAxis {
+  shape-rendering: crispEdges;
+}
+
+.barHierAxis path {
+  fill: none;
+}
+
+.x.barHierAxis line {
+  stroke: #000;
+  stroke-opacity: .8;
+}
+

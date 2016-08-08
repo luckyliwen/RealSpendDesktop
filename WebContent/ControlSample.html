@@ -1,0 +1,439 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="pragma" content="no-cache"> 
+	<meta http-equiv="Cache-Control" content="no-cache, must-revalidate"> 
+	<title>Demo of DetailPie and OverviewPies</title>
+
+	<script src="http://d3js.org/d3.v2.js"></script>
+	
+	<script src="resources/sap-ui-core.js" id="sap-ui-bootstrap"
+		data-sap-ui-libs="sap.ui.commons,sap.ui.table,sap.ui.core"
+		data-sap-ui-theme="sap_goldreflection">
+	</script>
+	
+	<script type="text/javascript" src="rs/uilib/Pie.js"></script>
+	<script type="text/javascript" src="rs/uilib/Bar.js"></script>
+	<script type="text/javascript" src="rs/util/Util.js"></script>
+	<script type="text/javascript" src="http://html2canvas.hertzen.com/build/html2canvas.js"></script>
+	<script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script> 
+	<script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
+	
+	<script>
+		sap.ui.localResources("rs/uilib");
+		
+		
+		// parameters: most parameters are the same as OverviewPies, here are some speical ones.
+		//		data			: pie data
+		//		rotatable		: true to enalbe rotate slice when click on it. Default is false
+		//		select			: a call back function, which will be invoked immediately when click on a slice. slice data and slice sequence will be passed in.
+		//		endRotate		: a call back function, which will be invoked when a rotate annimation is finished. only take effective when rotateble is set to true.
+		//		tooltipSelector : a selector function to provide tooltip content, it can be a string containing HTML code, or a UI5 control
+		//		showShadow		: show a shadow effect for the pie
+		//
+		// Methods:
+		//		triggerSelectionOn(seq) : seq is the sequence number of a slice. This method should be invoked after the pie gets rendered. The context has to be the Pie
+		
+		//pie demo, enabled rotate featrue and configued a select call back function.
+		var p = new rs.uilib.Pie("donuts1", {
+			
+			demoModel : true,
+			rotatable : true,
+			useDefaultTooltip : true,
+			select : function(d, i) {
+				//this function will be called immediatedly when click on a slice
+				//alert("selected " + i + " values : " + d.data);
+			},
+			endRotate : function(d, i) {
+				//called when rotation is finished
+				//alert("rotate finished \n selected " + i + "\n values: " + d.data);
+			},
+			tooltipSelector : function(d) {
+				var ttlabel = new sap.ui.commons.Label({text : "tooltip"});
+				var tlayout = new sap.ui.commons.layout.VerticalLayout({content: [ttlabel]});
+				return tlayout;
+			},
+			colorSelector : function(d) {
+				//in order to support gradient, the color needs to be in RGB format, or any other format that can be recogonized by d3.rgb
+				if(d.color == "yellow") {
+					return "rgb(255, 255, 0)";
+				} else if(d.color == "red") {
+					return "rgb(255, 0, 0)";
+				} else if(d.color == "green") {
+					return "rgb(0, 255, 0)";
+				} else {
+					
+				}
+			}
+		});
+		p.attachEvent("select", null, function(pa){
+			console.log("p", pa);
+			console.log("par:",pa.getParameters());
+		});
+		p.attachEvent("mouseOnSlice", null, function(pa){
+			//alert("hover on slice");
+		});
+		var ptf = new sap.ui.commons.TextField({value : 1});
+		var pbr = new sap.ui.commons.Button({text : "input slice NO above and click me to rotate the pie", press : function(){
+			p.triggerSelectionOn(ptf.getValue());
+		}});
+		var newDataBtn = new sap.ui.commons.Button({text : "load new data", press : function(){
+			p.loadNewData([{"label":"oneadsadf", "value":3, "color":"red"}, {"label":"two", "value":4, "color":"yellow"}, {"label":"two", "value":4, "color":"green"}, {"label":"two", "value":4, "color":"yellow"}]);
+		}});
+		var bkDataBtn = new sap.ui.commons.Button({text : "back to old data", press : function(){
+			p.loadNewData([{"label":"oneadsadf", "value":5, "color":"yellow"}, {"label":"two", "value":2, "color":"green"}, {"label":"two", "value":1, "color":"red"}, {"label":"two", "value":7, "color":"green"}]);
+		}});
+		var zeroDataBtn = new sap.ui.commons.Button({text : "empty data", press : function(){
+			p.loadNewData([]);
+		}});
+		var testBtn1 = new sap.ui.commons.Button({text : "test1 btn", press : function(){
+			subContainer.addContent(testBtn2);
+		}});
+		var testBtn2 = new sap.ui.commons.Button({text : "test2 btn", press : function(){
+			alert("test2");
+		}});
+		var subContainer = new sap.ui.commons.layout.VerticalLayout({content:[]});
+		//var pieLayout = new sap.ui.commons.layout.MatrixLayout({content: [p, ptf, pbr, newDataBtn, bkDataBtn, zeroDataBtn, testBtn1, subContainer]});
+		var cell01 = sap.ui.commons.layout.MatrixLayoutCell({content: [p, ptf, pbr, newDataBtn, bkDataBtn, zeroDataBtn, testBtn1, subContainer]});
+		var matrixrow = sap.ui.commons.layout.MatrixLayoutRow();
+		matrixrow.addCell(cell01);
+		var pieLayout = sap.ui.commons.layout.MatrixLayout();
+		pieLayout.addRow(matrixrow);
+		
+		
+		
+		
+		//bar demo.
+		//BudgetBar's length is all percentage based. Then the length can adjust automatically acoording to it's outer container.
+		//The BudgetBar looking can be set by a css class "budget_bar"
+		//BudgetBar has two models:
+		//	scale model: 
+		//		the position of budget line is relative to "total" and "maxValue". And maxValue is mandortory
+		//	constant model: 
+		//		budget line will be placed at a constant position, which has no relationship with width.
+		//		the default is constant model.
+		var budgetBar1 = new rs.uilib.BudgetBar({
+			total : "600",
+			budget : "300",
+			committed: "10",
+			color : "green"
+		});
+		var budgetBarT = new rs.uilib.BudgetBar({
+			total : "500",
+			budget : "0",
+			committed: "10",
+			color : "red"
+		});
+		var budgetBar11 = new rs.uilib.BudgetBar({
+			barModel : "scale",
+			maxValue : "800",
+			total : "490",
+			budget : "0",
+			color : "green"
+		});
+		var budgetBar2 = new rs.uilib.BudgetBar("bb2", {
+			total : "300",
+			budget : "0",
+			color : "green"
+		});
+		//budgetBar2.placeAt("scale_bar");
+		var barLayout = new sap.ui.commons.layout.VerticalLayout("bllayout", {content: [budgetBar1, budgetBarT, budgetBar11]});
+		barLayout.setWidth("100%");
+		
+		
+		
+		//testing save treetabel to CSV
+		var fmt1 = function(value) {
+			if(value == null) return null;
+			else return value + "-testFormat";
+			//return value + "-testFormat";
+			
+		}
+		//var data = {"0": { "a" : {"actual": "$2,380,371","name": "Application Development1", "leftOrOver": "$45,126 (2%) Over"}, "1" : {"actual": "$6,380,371","name": "IMS Development0", "leftOrOver": "$50,126 (2%) Over"}}, "1": {"actual": "$2,380,371","name": "Application Development","leftOrOver": "$45,126 (2%) Over"}, "2": {"name": "Application DevelopmentApplication DevelopmentApplication Development"}, "3": {"actual": "$2,380,371","name": "Application Development","leftOrOver": "$45,126 (2%) Over"}};
+		var data = [{"actual": "$2,380,371","name": "Application Development1", "leftOrOver": "$45,126 (2%) Over"},{"children":[{"actual": "$2,380,371","name": "Application Development1", "leftOrOver": "$45,126 (2%) Over"},{"actual": "$2,380,371","name": "Application Development1", "leftOrOver": "$45,126 (2%) Over"}]}];
+		
+		var oModel = new sap.ui.model.json.JSONModel();
+		oModel.setData({"tt": data});
+		var tv_money= new sap.ui.commons.TextView();
+		tv_money.bindProperty("text", "actual", fmt1);
+		var tt = new sap.ui.table.TreeTable({
+			columns : [new sap.ui.table.Column({
+				label : "Name",
+				template : "name"
+			}), new sap.ui.table.Column({
+				label : "Actual",
+				template : "actual"
+			}), new sap.ui.table.Column({
+				label : "Actual+format",
+				template : tv_money
+			}), new sap.ui.table.Column({
+				label : "Budget Left/Over",
+				template : "leftOrOver"
+			})],
+			selectionMode : sap.ui.table.SelectionMode.Single,
+			allowColumnReordering : true,
+			expandFirstLevel : false
+		});
+		tt.setModel(oModel);
+		tt.bindRows("/tt");
+		
+		function save2Text() {
+			rs.util.Util.saveTable2CSV(tt);
+		}
+		
+		
+		//testing callout
+		var otx = new sap.ui.commons.TextView({ text: "adsfasdfasdfasdfasdf"});
+		var co1 =  new sap.ui.commons.Callout({ content: otx, myPosition: sap.ui.core.Popup.Dock.LeftCenter , atPosition: sap.ui.core.Popup.Dock.LeftCenter  });
+		var calloutIcon = new sap.ui.commons.Label({text : "hover me to show a tooltip"});
+		var l1 = new sap.ui.commons.Label({text : "XXXXXXXXXXXXXXXXXXXX"});
+		var l2 = new sap.ui.commons.Label({text : "XXXXXXXXXXXXXXXXXXXX"});
+		var l3 = new sap.ui.commons.Label({text : "XXXXXXXXXXXXXXXXXXXX"});
+		var l4 = new sap.ui.commons.Label({text : "XXXXXXXXXXXXXXXXXXXX"});
+		var l5 = new sap.ui.commons.Label({text : "XXXXXXXXXXXXXXXXXXXX"});
+		calloutIcon.setTooltip(co1);
+		var coLayout = new sap.ui.commons.layout.VerticalLayout({height: "500px", content: [l1, l2, l3, l4, l5, calloutIcon]});
+		
+		
+		
+		//for testing
+		var testlabel1 = new sap.ui.commons.Label({text : "test label1"});
+		var ttestlayout1 = new sap.ui.commons.layout.VerticalLayout({content: [testlabel1]});
+		var testlabel2 = new sap.ui.commons.Label({text : "test label2"});
+		var ttestlayout2 = new sap.ui.commons.layout.VerticalLayout({content: [testlabel2]});
+		var testlabel3 = new sap.ui.commons.Label({text : "test label2"});
+		var ttestlayout3 = new sap.ui.commons.layout.VerticalLayout({content: [testlabel3]});
+		//ttestlayout1.placeAt("test");
+		//ttestlayout2.placeAt("test");
+		//ttestlayout3.placeAt("test");
+		
+		
+		//TAB all samples
+		var oTabStrip1 = new sap.ui.commons.TabStrip("TabStrip1");
+		oTabStrip1.createTab("pie",pieLayout);
+		oTabStrip1.createTab("bar",barLayout);
+		oTabStrip1.createTab("treetable",tt);
+		oTabStrip1.createTab("callout", coLayout);
+		oTabStrip1.placeAt("tab");
+		
+		
+		//after rendering actions
+		function groupRow() {
+			rs.util.Util.groupRow(tt);
+		}
+		
+		//testing save
+		function saveIE() {
+			if (document.execCommand) {
+	            var oWin = window.open("about:blank", "_blank");
+	            oWin.document.write("test data");
+	            oWin.document.close();
+	            var success = oWin.document.execCommand('SaveAs', true, "test.txt")
+	            oWin.close();
+	            if (!success)
+	                alert("Sorry, your browser does not support this feature");
+	        } else {
+	        	alert("Sorry, your browser does not support save as command");
+	        }
+		}
+		
+		//testing save
+		function saveSA() {
+			//text/plain
+			//application/octet-stream
+			var uriContent = "data:application/octet-stream;filename=filename.txt," + encodeURIComponent("test data");
+			var newWindow=window.open(uriContent);
+			//alert(newWindow);
+		}
+		
+		function toCanvas() {
+			html2canvas(document.body, {
+				allowTaint : true,
+				taintTest : false,
+			    onrendered: function(canvas) {
+			        // canvas is the final rendered <canvas> element
+			    	document.body.appendChild(canvas);
+			    }
+			});
+		}
+		
+		function convertSVG() {
+			canvg("svgC", '<svg><circle cx="100" cy="50" r="40" stroke="black" stroke-width="2" fill="red" /></svg>', { ignoreMouse: true, ignoreAnimation: true });
+			var c = document.getElementById("svgC");
+			var imgData = c.toDataURL();
+			$("<img />").attr("src", imgData).appendTo(document.body);
+		}
+		
+	     
+	</script>
+	
+	<style type="text/css">
+		.pie_container{
+			overflow:visible;
+		}
+		.pie_tooltip{
+			margin: 8px;
+    		line-height: 20px;
+   			display:none;
+			padding:10px;
+			position:absolute;	
+			z-index:1000;
+			width: 100px;
+			background: yellow;
+			box-shadow:5px 5px 8px #444;
+			-webkit-border-radius: 3px;
+			-moz-border-radius: 3px;
+			border-radius: 3px;;
+		}
+		.pie_tooltip .tri1 {
+    		z-index: 11;
+    		position: absolute;
+    		top: -20px;
+    		left: 10px;
+    		height: 0;
+    		width: 0;
+    		border-style: dotted dotted solid dotted;
+    		border-width: 10px;
+    		border-color: transparent transparent red transparent;
+    	}
+    	.pie_tooltip .tri2 {
+    	}
+		.pie_svg {}
+		.slice {}
+		.slice:hover {cursor: pointer;}
+		.slice_text {}
+		.slice_text:hover {cursor: pointer;}
+		
+		
+		
+		.budget_bar{}
+		.warningIcon {
+			position: absolute;
+			width: 30px;
+			height: 30px;
+			overflow: hidden;
+			background: url(images/add.png) no-repeat;
+		}
+		.bar_tooltip {
+			background-color: white;
+			box-shadow:5px 5px 8px #444;
+			-webkit-border-radius: 3px;
+			-moz-border-radius: 3px;
+			border-radius: 3px;
+			left : 40px;
+			top: -10px;
+			height: 50px;
+			width : 400px;
+			z-index : 10;
+		}
+		.bar_tooltip .tri1 {
+    		z-index: 11;
+    		position: absolute;
+    		top: 15px;
+    		left: -20px;
+    		height: 0;
+    		width: 0;
+    		border-style: dotted solid dotted dotted;
+    		border-width: 10px;
+    		border-color: transparent white transparent transparent;
+    	}
+    	.bar_tooltip .tri2 {
+    	}
+    	.budget_bar_total .tri_left {
+    		z-index: 11;
+    		position: absolute;
+    		left: 0;
+    		height: 0;
+    		width: 0;
+    		border-style: dotted dotted dotted solid;
+    		border-color: transparent transparent transparent green;
+    		top: 0px;
+    	}
+    	.budget_bar_total .tri_right {
+    		z-index: 11;
+    		position: absolute;
+    		left: 0;
+    		height: 0;
+    		width: 0;
+    		border-style: dotted solid dotted dotted;
+    		border-color: transparent green transparent transparent;
+    		top: 0px;
+    	}
+    	.budget_bar_committed {
+    		opacity: 0.6;
+    		background-color: gray;
+    		background-image: url(images/slash.png);
+    	}
+		
+		
+		
+		
+		.group-title {
+			background-color:grey;
+		}
+		
+		#p1 {height: 350px;}
+		#dp {height: 350px;}
+		
+		.treetable_container {background-color:grey; vertical-align:top;}
+		.tt_div {width: 700px;}
+		
+	</style>
+</head>
+<body>
+<!--  
+	the Donut pie demo, only a percentage will be displayed at each slice, try move your mouse over each slice to see a detail description. This pie chart is configured as rotatable, it can be disabled by configuration. <br />
+	<div id="donuts"> </div>
+	<hr />
+	a constant bar, the budget line is positioned at 90% of the total length;<br />
+	<div id="constant_bar" style="width: 700px;"> </div>
+	<hr />
+	a scale ar, the position of budget line is based on the budge vale and maxValue, the outer container's width is not set, the bar can adjust itself to according to the outer container's size.
+	<div id="scale_bar" style=""> </div>
+	<hr />
+	-->
+	<input type="button" value="save to CSV" onclick="javascript:save2Text();" />
+	<input type="button" value="save:ie" onclick="javascript:saveIE();" />
+	<input type="button" value="save:safari" onclick="javascript:saveSA();" />
+	<input type="button" value="to canvas" onclick="javascript:toCanvas();" />
+	<input type="button" value="convert svg" onclick="javascript:convertSVG();" />
+	<a href="data:application/octet-stream;base64,SGVsbG8sIFdvcmxkIQ%3D%3D" download="test.txt">
+    (text example)</a>
+    <br />
+    <img src="data:image/png;base64,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" />
+    <img width="336" height="69" src="http://www.w3schools.com/images/w3schoolslogoNEW310113.gif" alt="W3Schools.com" style="border:0;margin-top:5px;">
+	
+	<!--  
+	<div id="tt"> </div>
+	<hr />
+	<div id="tooltip"></div>
+	<hr />
+	<div id="test"> sfa</div>
+	-->
+	<div id="tab"></div>
+	<hr />
+	
+	<canvas id="svgC"></canvas>
+	
+	<!--  
+	TODO list:
+	1, comma in CSV format will be consider as delimiter of column, but the content of a cell may contain comma.
+	2, can only save the expanded rows. Because collapsed rows are not returned by getRows() method. But hidden rows will be returned. This is how TreeTable behave
+	3, color of slice
+	4, shadow of pie
+	5, tooltip of pie
+	6, group table, may use tree table to do this.
+	-->
+	
+	<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+		<defs>
+		<linearGradient id="orange_red" x1="0%" y1="0%" x2="100%" y2="0%">
+		<stop offset="0%" style="stop-color:rgb(255,255,0);"/>
+		<stop offset="100%" style="stop-color:rgb(255,0,0);"/>
+		</linearGradient>
+		</defs>
+	</svg>
+	
+</body>
+</html>
